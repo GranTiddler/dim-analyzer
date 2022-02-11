@@ -81,5 +81,4 @@ def split_parentheses(strang):
     return output
 
 
-print(carl)
 print(split_parentheses([carl]))
