@@ -161,8 +161,6 @@ def get_units(inp):
     return inp
 
 
-
-
 thing = input("eee: ")
 carl = get_units(thing)
 print(carl)
