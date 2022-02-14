@@ -90,7 +90,7 @@ def divide_units(listoid, above = True, layers = 0):
             temp = divide_units(i, above)
             top += temp[0]
             bottom += temp[1]
-            above = temp[2]
+            #above = temp[2]
 
     elif type(listoid) == str:
         for i in listoid:
@@ -107,21 +107,62 @@ def divide_units(listoid, above = True, layers = 0):
 def pow_units(strang):
     previous = 0
     temp = ""
-
-    for i in range(len(strang)):
-        if i + 2 < len(strang) and strang[i:i+2] == "**":
-            temp += strang[previous:i-1] + strang[i-1] * int(strang[i+2])
-            previous = i
+    if type(strang) == str:
+        for i in range(len(strang)):
+            if i + 2 < len(strang) and strang[i:i+2] == "**":
+                temp += strang[previous:i-1] + strang[i-1] * int(strang[i+2])
+                previous = i
+    elif type(strang) == list:
+        return strang
 
     return temp
 
 
+"""
+powers
+___________
+loop through indices
+if index is list loop through indices
+if index of index is string:
+ - if power is not first character apply current code
+ - if power is first duplicate previous index and remove power symbol (this will prob break with units but I don't care)
+    - remove until first other operator
+    - evaluate that section and multiply the thingey by that
+    
+divide
+
+remove all numeric characters
+
+format the output as unit class? 
+"""
+def remove_nums(lest):
+    temp = ""
+    if type(lest) == str:
+        for i in lest:
+            if not (str(i).isdigit() or i == "."):
+                temp += i
+        return temp
+    elif type(lest) == list:
+        for i in lest:
+            i = remove_nums(i)
+        return lest
+
+
 def get_units(inp):
-    inp = format_string(inp)
-    inp = pow_units(inp)
+    # remove spaces
+    inp = split_parentheses([inp])  # P
+    inp = pow_units(inp)            # E
+    print(inp)
+    inp = remove_nums(inp)
+
+                                    # M is implied
+    inp = divide_units(inp)         # D
+                                    # A + S don't play into dimensional analysis
+    return inp
+
+
 
 
 thing = input("eee: ")
-
-carl = pow_units(thing)
+carl = get_units(thing)
 print(carl)
