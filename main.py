@@ -1,5 +1,7 @@
 from math import *
 
+from jinja2 import TemplateSyntaxError
+
 class MathList:
     def __init__(self):
         self.data = []
@@ -93,7 +95,6 @@ class Unit:
         }
         for i in key.keys():
             for j in key[i].keys():
-                print(i, j)
                 self.symbols[j] += key[i][j] * self.symbols[i]
             self.symbols[i] = 0
 
@@ -184,14 +185,16 @@ def divide_units(listoid, above = True, layers = 0):
     top = []
     bottom = []
     layers += 1
+    print(above)
     if type(listoid) == list and listoid:
         for i in listoid:
             temp = divide_units(i, above)
             top += temp[0]
             bottom += temp[1]
-            #above = temp[2]
+            
 
     elif type(listoid) == str:
+        print(above, listoid)
         for i in listoid:
             if i == "/":
                 above = not above
@@ -199,7 +202,7 @@ def divide_units(listoid, above = True, layers = 0):
                 top.append(i)
             else:
                 bottom.append(i)
-
+        print(above, listoid)
     return [top, bottom, above]
 
 
@@ -207,34 +210,43 @@ def pow_units(strang):
     previous = 0
     temp = ""
     templist = []
-    if type(strang) == str:
+    if type(strang) == list:
         for i in range(len(strang)):
-            if i + 2 < len(strang) and strang[i:i+2] == "**":
-                temp += strang[previous:i-1] + strang[i-1] * int(strang[i+2])
-                previous = i
-        return temp
-    elif type(strang) == list:
-        for i in range(len(strang)):
-            if type(strang[i]) == str:
-                if strang[i][-2:] == "**":
-                    power = eval(unsplit_parentheses(strang[i+1]))
-                else:
-                    for j in range(len(strang[i])):
-                        if "**" in strang[i]:
-                            if i+1 < len(strang[i]) and strang[i][j:j+2] == "**":
+            if type(strang[i]) != list:
+                if "**" in strang[i]:
+                    if strang[i][-2:] == "**":
+                        power = eval(unsplit_parentheses(strang[i+1]))
+                    else:
+                        power = 1
+                        for j in range(len(strang[i])):
+                            if "**" in strang[i] and  i+1 < len(strang[i]) and strang[i][j:j+2] == "**":
                                 operater_at = j+2
-                    
-                    power = eval(strang[i][operater_at])
+                                power = eval(strang[i][operater_at:])
+                                # TODO this isn't following pemdas all the way but it can wait
 
-                print(power)
-                if power >= 1:
+                    # if the power is the first 
                     if strang[i][0:2] == "**":
-                        print("power of last parentheses")
+                        # TODO get last parentheses unit class and multiply by exponents, then replace with the string version - get units must be complete for this to work
+                        print("units", Unit(get_units(templist.pop(-1))) ** power)
                         for j in range(power):
                             templist.append(strang[i-1])
-                        print(templist)
-                    elif "**" in strang[i]:
-                        pass
+
+                    else:
+                        for j in range(len(strang[i])):
+                            if j + 2 < len(strang[i]) and strang[i][j:j+2] == "**":
+                                temp += strang[i][previous:j-1] + strang[i][j-1] * power
+                                previous = j
+                        # TODO make sure this isn't broken
+                        templist.append(temp)
+
+                else:
+                    templist.append(strang[i])
+            
+            else:
+                templist.append(pow_units(strang[i]))
+            
+    return templist
+
 
     
 def unsplit_parentheses(inp):
@@ -286,21 +298,20 @@ def remove_nums(lest):
 
 def get_units(inp):
     # remove spaces
-    inp = split_parentheses([inp])  # P
+    inp = split_parentheses([inp])
+    inp = pow_units(inp)
     print(inp)
-
-    inp = pow_units(inp)        # E
-    
-
+    inp = divide_units(inp)
+    print(inp)
     inp = remove_nums(inp)
-    print(inp)
 
     #inp = divide_units(inp)
-    return inp
+    return (inp)
 
 
 
 thing = input("input: ")
-carl = get_units(thing)
+
+carl = Unit(get_units(thing))
 
 print(carl)
