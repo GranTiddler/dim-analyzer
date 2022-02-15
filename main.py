@@ -35,7 +35,7 @@ class Unit:
             "hz": 0,
             "n": 0,
             "j": 0,
-            "W": 0
+            "w": 0
         }
         for i in symbol[0]:
             self.symbols[i] += 1
@@ -45,10 +45,10 @@ class Unit:
 
     def simplify(self):
         simplified = False
+        self.expand()
 
         n_sign = imath.sign(self.symbols["m"])
         if self.symbols["m"] * n_sign >= 1 and self.symbols["kg"] * n_sign >= 1 and self.symbols["s"] * n_sign <= -2:
-            print("reer")
             simplified = True
             self.symbols["kg"] -= 1 * n_sign
             self.symbols["m"] -= 1 * n_sign
@@ -62,8 +62,68 @@ class Unit:
             self.symbols["n"] -= 1 * j_sign
             self.symbols["m"] -= 1 * j_sign
 
+        w_sign = imath.sign(self.symbols["j"])
+        if self.symbols["j"] * w_sign >= 1 and self.symbols["s"] * w_sign <= -1:
+            simplified = True
+            self.symbols["j"] -= 1 * w_sign
+            self.symbols["s"] += 1 * w_sign
+            self.symbols["w"] += 1 * w_sign
+
         if simplified:
             self.simplify()
+
+    def add(self, unit, power):
+        self.symbols[unit] += power
+        self.simplify()
+
+    def expand(self):
+        key = {
+            "n": {
+                "s": -2,
+                "kg": 1,
+                "m": 1
+            },
+            "j": {
+                "s": -2,
+                "kg": 1,
+                "m": 2
+            },
+            "w": {
+                "s": -3,
+                "kg": 1,
+                "m": 2
+            }
+        }
+        for i in key.keys():
+            for j in key[i].keys():
+                print(i, j)
+                self.symbols[j] += key[i][j] * self.symbols[i]
+            self.symbols[i] = 0
+
+    def __str__(self):
+        temp = ["", ""]
+        for i in self.symbols.keys():
+            if self.symbols[i] == 0:
+                pass
+            elif self.symbols[i] >= 1:
+                temp[0] += i
+                if self.symbols[i] != 1:
+                    temp[0] += f"**{self.symbols[i]}"
+            elif self.symbols[i] <= 1:
+                temp[1] += i
+                if self.symbols[i] != -1:
+                    temp[1] += f"**{-self.symbols[i]}"
+
+        return "/".join(temp)
+
+    def root(self, root):
+        for i in self.symbols.keys():
+            self.symbols[i] /= root
+
+    def __pow__(self, power, modulo=None):
+        for i in self.symbols.keys():
+            self.symbols[i] *= power
+        return str(self)
 
 
 def split_parentheses(strang):
@@ -212,8 +272,9 @@ def get_units(inp):
     return inp
 
 
-thing = input("eee: ")
+#thing = input("eee: ")
 # carl = get_units(thing)
-boy = Unit([["s","s"],["kg", "m", "m"]])
-boy.simplify()
-print(boy.symbols)
+boy = Unit([["m","m"],["s","s"]])
+print(boy)
+boy.root(2)
+print(boy)
