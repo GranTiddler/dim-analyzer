@@ -227,13 +227,14 @@ def pow_units(strang):
                     power = eval(strang[i][operater_at])
 
                 print(power)
-                if strang[i][0:2] == "**":
-                    print("power of last parentheses")
-                    for j in range(power):
-                        templist.append(strang[i-1])
-                    print(templist)
-                elif "**" in strang[i]:
-                    pass
+                if power >= 1:
+                    if strang[i][0:2] == "**":
+                        print("power of last parentheses")
+                        for j in range(power):
+                            templist.append(strang[i-1])
+                        print(templist)
+                    elif "**" in strang[i]:
+                        pass
 
     
 def unsplit_parentheses(inp):
