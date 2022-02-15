@@ -1,5 +1,7 @@
 from math import *
 
+import imath
+
 
 class MathList:
     def __init__(self):
@@ -20,8 +22,48 @@ class Lambda:
         fx = input("Enter a function using the variable \"x\": ")
         self.greg = eval(f"lambda x: {fx}")
 
-    def stink(self, input):
-        return self.greg(input)
+    def stink(self, inp):
+        return self.greg(inp)
+
+
+class Unit:
+    def __init__(self, symbol):
+        self.symbols = {
+            "m": 0,
+            "s": 0,
+            "kg": 0,
+            "hz": 0,
+            "n": 0,
+            "j": 0,
+            "W": 0
+        }
+        for i in symbol[0]:
+            self.symbols[i] += 1
+
+        for i in symbol[1]:
+            self.symbols[i] -= 1
+
+    def simplify(self):
+        simplified = False
+
+        n_sign = imath.sign(self.symbols["m"])
+        if self.symbols["m"] * n_sign >= 1 and self.symbols["kg"] * n_sign >= 1 and self.symbols["s"] * n_sign <= -2:
+            print("reer")
+            simplified = True
+            self.symbols["kg"] -= 1 * n_sign
+            self.symbols["m"] -= 1 * n_sign
+            self.symbols["s"] += 2 * n_sign
+            self.symbols["n"] += 1 * n_sign
+
+        j_sign = imath.sign(self.symbols["m"])
+        if self.symbols["n"] * j_sign >= 1 and self.symbols["m"] * j_sign >= 1:
+            simplified = True
+            self.symbols["j"] += 1 * j_sign
+            self.symbols["n"] -= 1 * j_sign
+            self.symbols["m"] -= 1 * j_sign
+
+        if simplified:
+            self.simplify()
 
 
 def split_parentheses(strang):
@@ -107,15 +149,19 @@ def divide_units(listoid, above = True, layers = 0):
 def pow_units(strang):
     previous = 0
     temp = ""
+    templist = []
     if type(strang) == str:
         for i in range(len(strang)):
             if i + 2 < len(strang) and strang[i:i+2] == "**":
                 temp += strang[previous:i-1] + strang[i-1] * int(strang[i+2])
                 previous = i
+        return temp
     elif type(strang) == list:
-        return strang
-
-    return temp
+        for i in range(len(strang)):
+            if strang[i][0:2] == "**":
+                print("WEEE")
+                for j in range(eval(strang[i][2:])):
+                    templist.append(strang[i-1])
 
 
 """
@@ -135,32 +181,39 @@ remove all numeric characters
 
 format the output as unit class? 
 """
+
+
 def remove_nums(lest):
     temp = ""
+    templist =[]
     if type(lest) == str:
         for i in lest:
-            if not (str(i).isdigit() or i == "."):
+            if str(i).isdigit() or i == ".":
+                pass
+            else:
                 temp += i
         return temp
     elif type(lest) == list:
         for i in lest:
-            i = remove_nums(i)
-        return lest
+            templist.append(remove_nums(i))
+        return templist
 
 
 def get_units(inp):
     # remove spaces
     inp = split_parentheses([inp])  # P
     inp = pow_units(inp)            # E
-    print(inp)
     inp = remove_nums(inp)
+    print(inp)
 
                                     # M is implied
     inp = divide_units(inp)         # D
-                                    # A + S don't play into dimensional analysis
+                                    # A + S don't play in to dimensional analysis
     return inp
 
 
 thing = input("eee: ")
-carl = get_units(thing)
-print(carl)
+# carl = get_units(thing)
+boy = Unit([["s","s"],["kg", "m", "m"]])
+boy.simplify()
+print(boy.symbols)
