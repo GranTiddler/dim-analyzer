@@ -1,8 +1,5 @@
 from math import *
 
-import imath
-
-
 class MathList:
     def __init__(self):
         self.data = []
@@ -218,10 +215,37 @@ def pow_units(strang):
         return temp
     elif type(strang) == list:
         for i in range(len(strang)):
-            if strang[i][0:2] == "**":
-                print("WEEE")
-                for j in range(eval(strang[i][2:])):
-                    templist.append(strang[i-1])
+            if type(strang[i]) == str:
+                if strang[i][-2:] == "**":
+                    power = eval(unsplit_parentheses(strang[i+1]))
+                else:
+                    for j in range(len(strang[i])):
+                        if "**" in strang[i]:
+                            if i+1 < len(strang[i]) and strang[i][j:j+2] == "**":
+                                operater_at = j+2
+                    
+                    power = eval(strang[i][operater_at])
+
+                print(power)
+                if strang[i][0:2] == "**":
+                    print("power of last parentheses")
+                    for j in range(power):
+                        templist.append(strang[i-1])
+                    print(templist)
+                elif "**" in strang[i]:
+                    pass
+
+    
+def unsplit_parentheses(inp):
+    temp = ""
+    temp += "("
+    for i in inp:
+        if type(i) == list:
+            temp += unsplit_parentheses(i)
+        else:
+            temp += i
+    temp += ")"
+    return temp
 
 
 """
@@ -262,19 +286,20 @@ def remove_nums(lest):
 def get_units(inp):
     # remove spaces
     inp = split_parentheses([inp])  # P
-    inp = pow_units(inp)            # E
+    print(inp)
+
+    inp = pow_units(inp)        # E
+    
+
     inp = remove_nums(inp)
     print(inp)
 
-                                    # M is implied
-    inp = divide_units(inp)         # D
-                                    # A + S don't play in to dimensional analysis
+    #inp = divide_units(inp)
     return inp
 
 
-#thing = input("eee: ")
-# carl = get_units(thing)
-boy = Unit([["m","m"],["s","s"]])
-print(boy)
-boy.root(2)
-print(boy)
+
+thing = input("input: ")
+carl = get_units(thing)
+
+print(carl)
