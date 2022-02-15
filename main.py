@@ -37,10 +37,16 @@ class Unit:
             "w": 0
         }
         for i in symbol[0]:
-            self.symbols[i] += 1
+            if i in self.symbols.keys():
+                self.symbols[i] += 1
+            else:
+                self.symbols[i] = 1
 
         for i in symbol[1]:
-            self.symbols[i] -= 1
+            if i in self.symbols.keys():
+                self.symbols[i] -= 1
+            else:
+                self.symbols[i] = -1
 
     def simplify(self):
         simplified = False
@@ -119,9 +125,32 @@ class Unit:
             self.symbols[i] /= root
 
     def __pow__(self, power, modulo=None):
-        for i in self.symbols.keys():
-            self.symbols[i] *= power
+        if abs(power) < 1:
+            self.root(1/power)
+        else:    
+            for i in self.symbols.keys():
+                self.symbols[i] *= power
         return str(self)
+
+    def format(self):
+        temp = ""
+        top = ""
+        bottom = ""
+        for i in self.symbols.keys():
+            top += i * int(self.symbols[i])
+        if top:
+            temp += top
+        else:
+            temp += 1
+        
+        for i in self.symbols.keys():
+            if self.symbols[i] < 0:
+                bottom += i * abs(self.symbols[i])
+        if bottom:
+            temp += "/"
+            temp += bottom
+        
+        return temp
 
 
 def split_parentheses(strang):
@@ -188,14 +217,11 @@ def divide_units(listoid, above = True, layers = 0):
     if type(listoid) == list and listoid:
         for i in listoid:
             if type(i) == list:
-                print("list")
                 temp = divide_units(i, above)
-                print(temp)
                 top += temp[0]
                 bottom += temp[1]
 
             else:
-                print("string")
                 for j in i:
                     if j == "/":
                         above = not above
@@ -203,7 +229,7 @@ def divide_units(listoid, above = True, layers = 0):
                         top.append(j)
                     else:
                         bottom.append(j)
-                print(above, i)
+    
     return [top, bottom]
 
 
@@ -228,9 +254,10 @@ def pow_units(strang):
                     # if the power is the first 
                     if strang[i][0:2] == "**":
                         # TODO get last parentheses unit class and multiply by exponents, then replace with the string version - get units must be complete for this to work
-                        print("units", Unit(get_units(templist.pop(-1))) ** power)
-                        for j in range(power):
-                            templist.append(strang[i-1])
+                        unit = Unit(get_units(templist.pop(-1)))
+                        unit ** power
+                        templist.append(unit.format())
+                        
 
                     else:
                         for j in range(len(strang[i])):
@@ -286,26 +313,24 @@ def remove_nums(lest):
     templist =[]
     if type(lest) == str:
         for i in lest:
-            if str(i).isdigit() or i == ".":
+            if str(i).isdigit() or i == "." or i == "*":
                 pass
             else:
                 temp += i
         return temp
     elif type(lest) == list:
         for i in lest:
-            templist.append(remove_nums(i))
+            if len(i) >= 1:
+                templist.append(remove_nums(i))
         return templist
 
 
 def get_units(inp):
-    # remove spaces
     inp = split_parentheses([inp])
     inp = pow_units(inp)
     inp = divide_units(inp)
-    print(inp)
-    inp = remove_nums(inp)
+    inp = [remove_nums(inp[0]), remove_nums(inp[1])]
 
-    #inp = divide_units(inp)
     return (inp)
 
 
@@ -313,5 +338,5 @@ def get_units(inp):
 thing = input("input: ")
 
 carl = Unit(get_units(thing))
-
 print(carl)
+print(carl.symbols)
