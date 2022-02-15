@@ -185,25 +185,26 @@ def divide_units(listoid, above = True, layers = 0):
     top = []
     bottom = []
     layers += 1
-    print(above)
     if type(listoid) == list and listoid:
         for i in listoid:
-            temp = divide_units(i, above)
-            top += temp[0]
-            bottom += temp[1]
-            
+            if type(i) == list:
+                print("list")
+                temp = divide_units(i, above)
+                print(temp)
+                top += temp[0]
+                bottom += temp[1]
 
-    elif type(listoid) == str:
-        print(above, listoid)
-        for i in listoid:
-            if i == "/":
-                above = not above
-            elif above:
-                top.append(i)
             else:
-                bottom.append(i)
-        print(above, listoid)
-    return [top, bottom, above]
+                print("string")
+                for j in i:
+                    if j == "/":
+                        above = not above
+                    elif above:
+                        top.append(j)
+                    else:
+                        bottom.append(j)
+                print(above, i)
+    return [top, bottom]
 
 
 def pow_units(strang):
@@ -300,7 +301,6 @@ def get_units(inp):
     # remove spaces
     inp = split_parentheses([inp])
     inp = pow_units(inp)
-    print(inp)
     inp = divide_units(inp)
     print(inp)
     inp = remove_nums(inp)
